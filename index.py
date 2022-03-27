@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output
 from app import app
 from app import server
 from apps import chart, chart1
-
+import dash
 
 
 app.layout = html.Div([
