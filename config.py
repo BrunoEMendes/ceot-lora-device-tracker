@@ -4,3 +4,5 @@ LHT65_FIELDS = {
     'tmp':'device_frmpayload_data_TempC_SHT',
     'ilx':'device_frmpayload_data_ILL_lux'
 }
+
+MAX_LHT65_DEVICES = 25
