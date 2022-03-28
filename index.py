@@ -11,9 +11,14 @@ app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div([
         dcc.Link('LHT65 |', href='/apps/LHT65'),
-    ], className="row"),
+        dcc.Link('LSE01(NOT WORKING)', href='/apps/LSE01'),
+    ], className="inline-block"),
     html.Div(id='page-content', children=[],)
-])
+],  className='container-fluid inline-block',
+    style={
+        'padding-left':"5%",
+        'padding-right':"5%",
+    })
 
 
 @app.callback(Output('page-content', 'children'),
