@@ -1,5 +1,3 @@
-from tkinter.ttk import Style
-from click import style
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
