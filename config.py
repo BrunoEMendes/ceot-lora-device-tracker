@@ -6,3 +6,18 @@ LHT65_FIELDS = {
 }
 
 MAX_LHT65_DEVICES = 25
+
+
+LSE01_FIELDS = {
+    'bat': 'device_frmpayload_data_Bat',
+    'soil_hum': 'device_frmpayload_data_water_SOIL',
+    'soil_cond': 'device_frmpayload_data_conduct_SOIL',
+    'soil_tmp':'device_frmpayload_data_temp_SOIL'
+}
+
+MAX_LSE01_DEVICES = 6
+
+
+SIGNAL_FIELDS = ['rssi', 'snr']
+
+MEASUREMENT_OPTIONS = ['mean', 'max', 'min', 'median', 'stddev']

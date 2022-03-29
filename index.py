@@ -3,15 +3,16 @@ from dash import html
 from dash.dependencies import Input, Output
 from app import app
 from app import server
-from apps import LHT65
+from apps import LHT65, LSE01, Home
 import dash
 
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div([
+        dcc.Link('Home|', href=''),
         dcc.Link('LHT65 |', href='/apps/LHT65'),
-        dcc.Link('LSE01(NOT WORKING)', href='/apps/LSE01'),
+        dcc.Link('LSE01', href='/apps/LSE01'),
     ], className="inline-block"),
     html.Div(id='page-content', children=[],)
 ],  className='container-fluid inline-block',
@@ -24,8 +25,12 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
+    # if pathname == '':
+    #     return Home.layout
     if pathname == '/apps/LHT65':
         return LHT65.layout
+    if pathname == '/apps/LSE01':
+        return LSE01.layout
     else:
         return LHT65.layout
 

@@ -1,4 +1,3 @@
-from tabnanny import check
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
@@ -15,7 +14,6 @@ from datetime import datetime
 from .modules.client import Client
 import config as config
 import secret
-import plotly.graph_objects as go
 
 
 START = int(datetime(2022,3,12,7,30,0, tzinfo=None).timestamp())
@@ -23,56 +21,28 @@ START = int(datetime(2022,3,12,7,30,0, tzinfo=None).timestamp())
 layout = html.Div([
     html.Div([
         html.Div([
+
             html.Div([
                 dcc.Dropdown(
-                    list(config.LHT65_FIELDS.keys()),
-                    list(config.LHT65_FIELDS.keys())[0],
-                    id='xaxis-column'
+                    list(config.LSE01_FIELDS.keys()),
+                    list(config.LSE01_FIELDS.keys())[0],
+                    id='xaxis-column-lse01'
                 ),
             ], style={'width': '48%', 'display': 'inline-block'}),
 
         ]),
-    dcc.Graph(id='indicator-graphic'),
-    ]),
-    
     dcc.Checklist(
-        id="checklist",
-        options=['L'+ str(i) for i in range(1, config.MAX_LHT65_DEVICES + 1)],
-        value=['L1'],
+        id="checklist-lse01",
+        options=['SM'+ str(i) for i in range(1, config.MAX_LSE01_DEVICES + 1)],
+        value=['SM1'],
         inline=True,
         inputStyle={
             "margin-left": "20px",
             "margin-right": "2px",
         }
     ),
-##################################################################################
-
-    html.Hr(),
-    html.Div([
-            html.Div([
-            html.Div([
-                dcc.Dropdown(
-                    list(config.LHT65_FIELDS.keys()),
-                    list(config.LHT65_FIELDS.keys())[0],
-                    id='field-7days-lht65'
-                ),
-            ], style={'width': '48%', 'display': 'inline-block'}),
-
-        ]),
-        dcc.Graph(id="graph-mean-last-7-days-lht65"),
-        dcc.Checklist(
-            id="checklist-math",
-            options=config.MEASUREMENT_OPTIONS,
-            value=['mean'],
-            inline=True,
-            inputStyle={
-                "margin-left": "20px",
-                "margin-right": "2px",
-            }
-        ),
+    dcc.Graph(id='indicator-graphic-lse01'),
     ]),
-##################################################################################
-
     html.Hr(),
     html.Div([
         html.Div([
@@ -80,18 +50,17 @@ layout = html.Div([
                 dcc.Dropdown(
                     config.SIGNAL_FIELDS,
                     config.SIGNAL_FIELDS[0],
-                    id='sf-lht65'
+                    id='sf-lse01'
                 ),
             ], style={'width': '48%', 'display': 'inline-block'}),
 
         ]),
     ]),
-    
-    dcc.Graph(id='signal-graphic-lht65'),
+    dcc.Graph(id='signal-graphic-lse01'),
     dcc.Checklist(
-        id="checklist-signal",
-        options=['L'+ str(i) for i in range(1, config.MAX_LHT65_DEVICES + 1)],
-        value=['L1'],
+        id="checklist-signal-lse01",
+        options=['SM'+ str(i) for i in range(1, config.MAX_LSE01_DEVICES + 1)],
+        value=['SM1'],
         inline=True,
         inputStyle={
             "margin-left": "20px",
@@ -101,21 +70,25 @@ layout = html.Div([
 
 ], className='container-fluid inline-block')
 
-##############################################################
+
+
+import plotly.graph_objects as go
+
 @app.callback(
-    Output('indicator-graphic', 'figure'),
-    Input('xaxis-column', 'value'),
-    Input("checklist", "value"),
-    Input('indicator-graphic', 'figure'),)
+    Output('indicator-graphic-lse01', 'figure'),
+    Input('xaxis-column-lse01', 'value'),
+    Input("checklist-lse01", "value"),
+    Input('indicator-graphic-lse01', 'figure'),)
 def update_graph(xaxis_column_name, checklist, graph):
 
     # vars
     existing_fields = []
     new_data = []
 
+
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'LHT65 {xaxis_column_name} measurement', 
+    fig.update_layout(title_text=f'LSE01 {xaxis_column_name} measurement', 
                         title_x=0.5,                    
                         xaxis_title='Date',
                         yaxis_title=f'{xaxis_column_name}')
@@ -123,7 +96,6 @@ def update_graph(xaxis_column_name, checklist, graph):
 
     # se nao existir grafico ainda e se nao ouver alteração de colunas
     if graph != None and graph['layout']['yaxis']['title']['text'] == xaxis_column_name:
-
 
         # procura os campos existentes
         existing_fields = [g['name'] for g in graph['data']]
@@ -135,16 +107,16 @@ def update_graph(xaxis_column_name, checklist, graph):
         graph['data'] = new_data
         fig = go.Figure(graph)
 
+
     # inicia o cliente IDB
     client = Client(secret.server, secret.port, secret.token, secret.org).client()
-    dp = DeviceProfile('LHT65', config.LHT65_FIELDS)
-
+    dp = DeviceProfile('LSE01', config.LSE01_FIELDS)
+    
     # se o valor o dispositivo estiver na checklist e ainda nao exisitr no grafico é adiconado
     for k in checklist:
         if not k in existing_fields:
-            device = Device(k, dp, client, 'Arvores')
+            device = Device(k, dp, client, 'Solo')
             df = device.query_field(xaxis_column_name, START)
-
             fig.add_trace(go.Scatter(
                 x=df['time'],
                 y=df[xaxis_column_name],
@@ -152,56 +124,13 @@ def update_graph(xaxis_column_name, checklist, graph):
             ))
     return fig
 
-##################################################################################################################################
+################################################################################################################################
+
 @app.callback(
-    Output('graph-mean-last-7-days-lht65', 'figure'),
-    Input('field-7days-lht65', 'value'),
-    Input('checklist-math', 'value'),
-    Input('graph-mean-last-7-days-lht65', 'figure'),)
-def update_graph_last7days(field, checklist, graph):
-
-    existing_fields = []
-    new_data = []
-
-    fig = go.Figure()
-    fig.update_layout(title_text=f'LHT65 {field} field last 7 days', 
-                    title_x=0.5,                    
-                    xaxis_title='Date',
-                    yaxis_title=f'{field}')
-    if graph != None and graph['layout']['yaxis']['title']['text'] == field:
-
-        # procura os campos existentes
-        existing_fields = [g['name'] for g in graph['data']]
-        
-        # mantem os dados que nao foram removidos da checklist
-        new_data = [g for g in graph['data'] if g['name'] in checklist]
-        
-        # cria grafico sem os dados que foram removidos
-        graph['data'] = new_data
-        fig = go.Figure(graph)
-
-    client = Client(secret.server, secret.port, secret.token, secret.org).client()
-    dp = DeviceProfile('LHT65', config.LHT65_FIELDS)
-    # se o valor o dispositivo estiver na checklist e ainda nao exisitr no grafico é adiconado
-    for k in checklist:
-        if not k in existing_fields:
-            device = Device('L1', dp, client, 'Arvores')
-            df = device.get_mean_days(field,  k, "7",  START)
-            # print( device._query_interval_mean(field,  k, "7",  START))
-            fig.add_trace(go.Scatter(
-                x=df['time'],
-                y=df[field],
-                name=k))
-    return fig
-
-
-
-##########################################
-@app.callback(
-    Output('signal-graphic-lht65', 'figure'),
-    Input('sf-lht65', 'value'),
-    Input("checklist-signal", "value"),
-    Input('signal-graphic-lht65', 'figure'),)
+    Output('signal-graphic-lse01', 'figure'),
+    Input('sf-lse01', 'value'),
+    Input("checklist-signal-lse01", "value"),
+    Input('signal-graphic-lse01', 'figure'),)
 def update_signal_graph(xaxis_column_name, checklist, graph):
     # vars
     existing_fields = []
@@ -209,12 +138,10 @@ def update_signal_graph(xaxis_column_name, checklist, graph):
 
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'LHT65 {xaxis_column_name} field', 
+    fig.update_layout(title_text=f'LSE01 {xaxis_column_name} field', 
                         title_x=0.5,                    
                         xaxis_title='Date',
                         yaxis_title=f'{xaxis_column_name}')
-
-  
 
 
     # se nao existir grafico ainda e se nao ouver alteração de colunas
@@ -232,12 +159,12 @@ def update_signal_graph(xaxis_column_name, checklist, graph):
 
     # inicia o cliente IDB
     client = Client(secret.server, secret.port, secret.token, secret.org).client()
-    dp = DeviceProfile('LHT65', config.LHT65_FIELDS)
+    dp = DeviceProfile('LSE01', config.LSE01_FIELDS)
     
     # se o valor o dispositivo estiver na checklist e ainda nao exisitr no grafico é adiconado
     for k in checklist:
         if not k in existing_fields:
-            device = Device(k, dp, client, 'Arvores')
+            device = Device(k, dp, client, 'Solo')
             df = device.query_signal_status(xaxis_column_name, START)
             fig.add_trace(go.Scatter(
                 x=df['time'],

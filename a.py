@@ -10,4 +10,6 @@ if __name__ == "__main__":
     dp = DeviceProfile('LHT65', config.LHT65_FIELDS)
     d = Device('L1', dp, client, 'Arvores')
     # print(d.query_all_fields(START ))
-    print(d.query_field('tmp', START ))
+    # print(d.query_field('tmp', START ))
+    print(d._query_interval_mean('tmp', 'mean', '7', START ))
+    print(d.get_mean_days('tmp', 'mean', '7', START ))

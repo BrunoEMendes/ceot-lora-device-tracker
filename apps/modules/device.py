@@ -29,6 +29,9 @@ class Device:
         self.bucket = bucket
 
 
+#########################################################################################################
+#########################################################################################################
+
     def _make_query(self, start_time, end_time='', field_type='', field = ''):
         if end_time == '':
             date_range = f'(start:{start_time})'
@@ -62,6 +65,16 @@ class Device:
         |> filter(fn: (r) => {filter_field[:-3]})
         '''
 
+    def _query_interval_mean(self, field, transformation, interval, start_time):
+        return f'''from(bucket: "{self.bucket}")
+  |> range(start: {start_time})
+  |> filter(fn: (r) => r["_measurement"] == "{field}")
+  |> group(columns: ["_measurement"])
+  |> aggregateWindow(every: {interval}d, fn: {transformation}, createEmpty: false)
+  |> yield(name: "{transformation}")
+    '''
+#################################################################################################################
+#################################################################################################################
 
     def _collect_measurements(self, query, field_type='measurement'):
         tmp = []
@@ -86,6 +99,8 @@ class Device:
         df['time'] = df['time'].astype('datetime64[ns]')
         return df
 
+
+
     def query_all_fields(self, start_time, end_time=''):
         q = self._make_query(start_time, field_type='measurement')
         r = self.query.query(org=self.client.org, query=q)
@@ -96,28 +111,43 @@ class Device:
         r = self.query.query(org=self.client.org, query=q)
         return self._collect_measurements(r)
 
-
-#not done
-    def query_field(self, field, start_time, end_time=''):
-        f = self.deviceprofile.get_field(field)
-        if field in self.deviceprofile.get_fieldnames():
-            q = self._make_query(start_time=start_time, end_time=end_time, field_type='measurement', field=f)
+    def _query_fields(self, field, field_type, start_time, end_time=''):
+        if field_type == 'measurement':
+            f = self.deviceprofile.get_field(field)
+            if field in self.deviceprofile.get_fieldnames():
+                q = self._make_query(start_time=start_time, end_time=end_time, field_type=field_type, field=f)
+            else:
+                raise ValueError(f'{field} does not exist in {self.deviceprofile.get_fieldnames()}') 
         else:
-            raise ValueError(f'{field} does not exist in {self.deviceprofile.get_fieldnames()}') 
+            q = self._make_query(start_time=start_time, end_time=end_time, field_type=field_type, field=field)
+
         r = self.query.query(org=self.client.org, query=q)
 
         tmp = []
-        field_type = 'measurement'
         for i in r:
             for j in i:
                 tmp.append([j.get_time(), j.get_value()])
         
         df = pd.DataFrame(tmp, columns=['time', field])
-        df = df.sort_values(by=['time'])    
+        df = df.sort_values(by=['time'])  
         return df
-        
-        # return self._collect_measurements(r)
-        
+
+    def query_signal_status(self, field, start_time, end_time=''):
+        return self._query_fields(field, 'field', start_time, end_time)
+
+    def query_field(self, field, start_time, end_time=''):   
+        return self._query_fields(field, 'measurement', start_time, end_time)
+
+
+    def get_mean_days(self, field, transformation, interval, start_time, end_time=''):
+        f = self.deviceprofile.get_field(field)
+
+        q = self._query_interval_mean(field=f, transformation=transformation, interval=interval, start_time=start_time)
+        r = self.query.query(org=self.client.org, query=q)
+        tmp = [[j.get_time(), j.get_value()] for i in r for j in i]
+        df = pd.DataFrame(tmp, columns=['time', field])
+        df = df.sort_values(by=['time'])
+        return df 
 
      
        
