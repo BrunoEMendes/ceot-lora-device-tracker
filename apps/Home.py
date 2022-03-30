@@ -61,7 +61,7 @@ def mapbox(heatmap):
 
     fig = px.density_mapbox(clone, lat='Lat', lon='Lon', z='tmp', radius=10,
                         center=dict(lat=0, lon=180), zoom=0,
-                        mapbox_style="stamen-terrain", 
+                        # mapbox_style="stamen-terrain", 
                         # color_continuous_scale= [
                         #         [0.0, "green"],
                         #         [0.5, "green"],
@@ -69,8 +69,11 @@ def mapbox(heatmap):
                         #         [0.71111111, "yellow"],
                         #         [0.71111112, "red"],
                         #         [1, "red"]],
-                        #                 opacity = 1
+                        #         opacity = 1,
+                        #         # range_color=[min(tmp), max(tmp)],
+                        opacity=1,
                         )
 
+    fig.update_layout(mapbox_accesstoken=token, mapbox_style='satellite-streets')
 
     return fig
