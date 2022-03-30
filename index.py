@@ -25,14 +25,14 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    # if pathname == '':
-    #     return Home.layout
+    if pathname == '':
+        return Home.layout
     if pathname == '/apps/LHT65':
         return LHT65.layout
     if pathname == '/apps/LSE01':
         return LSE01.layout
     else:
-        return LHT65.layout
+        return Home.layout
 
 
 if __name__ == '__main__':

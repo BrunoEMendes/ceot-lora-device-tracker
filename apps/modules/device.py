@@ -138,6 +138,13 @@ class Device:
     def query_field(self, field, start_time, end_time=''):   
         return self._query_fields(field, 'measurement', start_time, end_time)
 
+    def get_last_value(self, field):
+        f = self.deviceprofile.get_field(field)
+        q = self._make_query('-1h', field_type='measurement')
+        r = self.query.query(org=self.client.org, query=q)
+
+        value = [j.get_value() for i in r for j in i]
+        return value[-1] 
 
     def get_mean_days(self, field, transformation, interval, start_time, end_time=''):
         f = self.deviceprofile.get_field(field)
