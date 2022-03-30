@@ -2,6 +2,7 @@ from tabnanny import check
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
+from matplotlib import markers
 import plotly
 import plotly.express as px
 
@@ -32,7 +33,10 @@ layout = html.Div([
             ], style={'width': '48%', 'display': 'inline-block'}),
 
         ]),
-    dcc.Graph(id='indicator-graphic'),
+    dcc.Graph(id='indicator-graphic',
+                style={
+                  'height':'70vh'
+              }),
     ]),
     
     dcc.Checklist(
@@ -59,7 +63,10 @@ layout = html.Div([
             ], style={'width': '48%', 'display': 'inline-block'}),
 
         ]),
-        dcc.Graph(id="graph-mean-last-7-days-lht65"),
+        dcc.Graph(  id="graph-mean-last-7-days-lht65",
+                    style={
+                        'height':'70vh'
+                    }),
         dcc.Checklist(
             id="checklist-math",
             options=config.MEASUREMENT_OPTIONS,
@@ -87,7 +94,10 @@ layout = html.Div([
         ]),
     ]),
     
-    dcc.Graph(id='signal-graphic-lht65'),
+    dcc.Graph(id='signal-graphic-lht65',
+              style={
+                  'height':'70vh'
+              }),
     dcc.Checklist(
         id="checklist-signal",
         options=['L'+ str(i) for i in range(1, config.MAX_LHT65_DEVICES + 1)],
@@ -115,10 +125,10 @@ def update_graph(xaxis_column_name, checklist, graph):
 
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'LHT65 {xaxis_column_name} measurement', 
+    fig.update_layout(title_text=f'Tree Sensors {xaxis_column_name} measurement', 
                         title_x=0.5,                    
                         xaxis_title='Date',
-                        yaxis_title=f'{xaxis_column_name}')
+                        yaxis_title=f'{xaxis_column_name}',)
 
 
     # se nao existir grafico ainda e se nao ouver alteração de colunas
@@ -148,8 +158,10 @@ def update_graph(xaxis_column_name, checklist, graph):
             fig.add_trace(go.Scatter(
                 x=df['time'],
                 y=df[xaxis_column_name],
-                name=k
-            ))
+                name=k,
+                mode='lines'
+               )
+            )
     return fig
 
 ##################################################################################################################################
@@ -164,7 +176,7 @@ def update_graph_last7days(field, checklist, graph):
     new_data = []
 
     fig = go.Figure()
-    fig.update_layout(title_text=f'LHT65 {field} field last 7 days', 
+    fig.update_layout(title_text=f'Tree Sensors  {field} field last 7 days', 
                     title_x=0.5,                    
                     xaxis_title='Date',
                     yaxis_title=f'{field}')
@@ -187,11 +199,10 @@ def update_graph_last7days(field, checklist, graph):
         if not k in existing_fields:
             device = Device('L1', dp, client, 'Arvores')
             df = device.get_mean_days(field,  k, "7",  START)
-            # print( device._query_interval_mean(field,  k, "7",  START))
             fig.add_trace(go.Scatter(
                 x=df['time'],
                 y=df[field],
-                name=k))
+                name=k,))
     return fig
 
 
@@ -209,7 +220,7 @@ def update_signal_graph(xaxis_column_name, checklist, graph):
 
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'LHT65 {xaxis_column_name} field', 
+    fig.update_layout(title_text=f'Tree Sensors {xaxis_column_name} field', 
                         title_x=0.5,                    
                         xaxis_title='Date',
                         yaxis_title=f'{xaxis_column_name}')
@@ -242,7 +253,7 @@ def update_signal_graph(xaxis_column_name, checklist, graph):
             fig.add_trace(go.Scatter(
                 x=df['time'],
                 y=df[xaxis_column_name],
-                name=k
+                name=k,
             ))
 
     return fig

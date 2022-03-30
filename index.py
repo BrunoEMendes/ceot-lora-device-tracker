@@ -3,14 +3,15 @@ from dash import html
 from dash.dependencies import Input, Output
 from app import app
 from app import server
-from apps import LHT65, LSE01, Home
+from apps import LHT65, LSE01, Map, Home
 import dash
-
+import os
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div([
-        dcc.Link('Home|', href=''),
+        dcc.Link('Home|', href='/'),
+        dcc.Link('Map|', href='/apps/Map'),
         dcc.Link('LHT65 |', href='/apps/LHT65'),
         dcc.Link('LSE01', href='/apps/LSE01'),
     ], className="inline-block"),
@@ -22,11 +23,15 @@ app.layout = html.Div([
     })
 
 
+# app._favicon = f'{os.getcwd()}\ceot-logo.png'
+
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '':
+    if pathname == '/':
         return Home.layout
+    if pathname == '/apps/Map':
+        return Map.layout
     if pathname == '/apps/LHT65':
         return LHT65.layout
     if pathname == '/apps/LSE01':

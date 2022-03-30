@@ -1,4 +1,6 @@
 from tabnanny import check
+from turtle import width
+from click import style
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
@@ -19,61 +21,88 @@ import plotly.graph_objects as go
 
 import pandas as pd
 
-lht65_location = pd.read_csv("lht65_device_loc.csv")
 
-import plotly.express as px
-
-START = int(datetime(2022,3,12,7,30,0, tzinfo=None).timestamp())
-token = 'pk.eyJ1IjoiYmVtZW5kZXMiLCJhIjoiY2wxZG03aWo0MGl1NjNqbzBocDN5empjaCJ9.fqgJSctKC4dKZFiNhsjpZQ'
 
 layout = html.Div([
-      dcc.Dropdown(
-                    list(config.LHT65_FIELDS.keys()),
-                    list(config.LHT65_FIELDS.keys())[0],
-                    id='xaxis-column'
-                ),
-        dcc.Graph(id='mapbox'),
-]),
+        html.Div(children=[
+                    html.Img(src=app.get_asset_url('ceot-logo2.png'),
+                             style={'width':'445', 'height':'62'}),
+                    html.H2(children='Experimental Tree Orange Sensor Network (Paderne)')
+                    ]),
+        dcc.Interval(
+            id='update-ws',
+            interval=30*10000, # in milliseconds
+            n_intervals=0
+        ),
+        dcc.Interval(
+            id='update-clock',
+            interval=1000, #1sec
+        ),
+        
+        html.Div(className='6 columns div meteo',
+            children=[
+                html.H3(children='Condições meteorológicas agora'),
+                html.P(id='texto_meteo_time',children=[]),
+                html.P(id='texto_meteo_temp',children=[]),
+                html.P(id='texto_meteo_hum',children=[]),
+                html.P(id='texto_meteo_lum',children=[]),  
+                html.P(id='texto_meteo_press',children=[]),
+                html.P(id='texto_meteo_rain',children=[]),
+                html.P(id='texto_meteo_wind',children=[]),
+                html.P(id='texto_meteo_wind_dir',children=[]),
+                html.P(id='texto_meteo_wind_10min',children=[])
+                ],style={
+                'margin-left':'30px',
+                'width':'60%',
+                'vertical-align':'text-top',
+                'font-family': 'sans-serif',
+                'text-align':'left',
+                'display':'inline-block',
+                'border-width':'0px',
+                'border-style':'solid',
+                'border-color':'black'
+            }),
+        ])
 
 @app.callback(
-    Output('mapbox', 'figure'),
-    Input('xaxis-column', 'value'))
-def mapbox(heatmap):
-    # print()
-    # fig = px.scatter_mapbox(lht65_location, lat="Lat", lon="Lon", hover_name="Device",
-    #                         color_discrete_sequence=["fuchsia"], zoom=3, height=300)
-    # fig.update_layout(mapbox_style="stamen-terrain", mapbox_accesstoken=token)
-    # fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    Output(component_id = 'texto_meteo_time', component_property='children'),
+    Input('update-clock', 'n_intervals')
+)
+def update_clock(n):
+    return f'current time: {datetime.now()}'
 
 
+
+
+
+@app.callback(
+    [Output(component_id = 'texto_meteo_temp', component_property='children'),
+     Output(component_id = 'texto_meteo_hum', component_property='children'),
+     Output(component_id = 'texto_meteo_lum', component_property='children'),
+     Output(component_id = 'texto_meteo_press', component_property='children'),
+     Output(component_id = 'texto_meteo_rain', component_property='children'),
+     Output(component_id = 'texto_meteo_wind', component_property='children'),
+     Output(component_id = 'texto_meteo_wind_dir', component_property='children'),
+     Output(component_id = 'texto_meteo_wind_10min', component_property='children'),    
+    [Input('update-ws', 'n_intervals')]
+    ]
+)
+def update_ws_data(n):
     client = Client(secret.server, secret.port, secret.token, secret.org).client()
-    dp = DeviceProfile('LHT65', config.LHT65_FIELDS)
-    
+    dp = DeviceProfile('WS', config.WS_FIELDS)
     tmp = []
-    for index, row in lht65_location.iterrows():
-        device = Device(row['Device'], dp, client, 'Arvores')
-        df = device.get_last_value('tmp')
-        tmp.append(df)
-        
-    clone = lht65_location.__deepcopy__()
+    for key, val in config.WS_FIELDS.items():
+        device = Device('Weather-Station', dp, client, 'Weather-Station')
+        df = device.get_last_value(key)
+        tmp.append(df)  
 
-    clone['tmp'] = tmp
-
-    fig = px.density_mapbox(clone, lat='Lat', lon='Lon', z='tmp', radius=10,
-                        center=dict(lat=0, lon=180), zoom=0,
-                        # mapbox_style="stamen-terrain", 
-                        # color_continuous_scale= [
-                        #         [0.0, "green"],
-                        #         [0.5, "green"],
-                        #         [0.51111111, "yellow"],
-                        #         [0.71111111, "yellow"],
-                        #         [0.71111112, "red"],
-                        #         [1, "red"]],
-                        #         opacity = 1,
-                        #         # range_color=[min(tmp), max(tmp)],
-                        opacity=1,
-                        )
-
-    fig.update_layout(mapbox_accesstoken=token, mapbox_style='satellite-streets')
-
-    return fig
+    meteo_temp = f'Temperatura: {tmp[0]:.2} ºC'
+    meteo_hum = f'Humidade: {tmp[1]:.2f} % '
+    meteo_lum = f'Radiação solar: {tmp[2]:.2f} W/m^2'
+    meteo_press = f'Pressão atmosférica: {tmp[3]:.2f} hPa'
+    meteo_rain = f'Precipitação: {tmp[4]:.2f} mm/h'
+    meteo_wind = f'Velocidade do vento: {tmp[5]:.2f} m/s'
+    meteo_wind_dir = f'Direção do vento: {tmp[6]:.2f} º (360=N, 270=W, 180=S, 90=E)'
+    meteo_wind_10min = f'Velocidade média do vento (10 min): {tmp[7]:.2f} m/s'
+    
+    return meteo_temp, meteo_hum, meteo_lum, meteo_press, meteo_rain, meteo_wind, meteo_wind_dir, meteo_wind_10min

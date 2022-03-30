@@ -21,3 +21,15 @@ MAX_LSE01_DEVICES = 6
 SIGNAL_FIELDS = ['rssi', 'snr']
 
 MEASUREMENT_OPTIONS = ['mean', 'max', 'min', 'median', 'stddev']
+
+
+WS_FIELDS = {
+    'outsidetmp': 'device_frmpayload_data_OUTSIDETEMPERATURE',
+    'outsidehum': 'device_frmpayload_data_OUTSIDEHUMIDITY',
+    'solarrad'  : 'device_frmpayload_data_SOLARADIATION',
+    'pressure'  : 'device_frmpayload_data_PRESSURE',
+    'dayrain'   : 'device_frmpayload_data_DAYRAIN',
+    'windspeed' : 'device_frmpayload_data_WINDSPEED',
+    'winddir'   : 'device_frmpayload_data_WINDDIRECTION',
+    '10minavg'  : 'device_frmpayload_data_TENMINUTESAVGWINDSPEED',
+}

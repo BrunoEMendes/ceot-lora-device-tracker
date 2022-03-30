@@ -88,7 +88,7 @@ def update_graph(xaxis_column_name, checklist, graph):
 
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'LSE01 {xaxis_column_name} measurement', 
+    fig.update_layout(title_text=f'Soil sensor {xaxis_column_name} measurement', 
                         title_x=0.5,                    
                         xaxis_title='Date',
                         yaxis_title=f'{xaxis_column_name}')
@@ -138,7 +138,7 @@ def update_signal_graph(xaxis_column_name, checklist, graph):
 
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'LSE01 {xaxis_column_name} field', 
+    fig.update_layout(title_text=f'Soil sensor {xaxis_column_name} field', 
                         title_x=0.5,                    
                         xaxis_title='Date',
                         yaxis_title=f'{xaxis_column_name}')
