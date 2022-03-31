@@ -1,6 +1,3 @@
-from tabnanny import check
-from turtle import width
-from click import style
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
