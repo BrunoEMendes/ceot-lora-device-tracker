@@ -2,12 +2,9 @@ from tabnanny import check
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-from matplotlib import markers
-import plotly
 import plotly.express as px
 
 import pandas as pd
-import pathlib
 from app import app
 import datetime
 
