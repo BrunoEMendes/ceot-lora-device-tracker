@@ -1,14 +1,9 @@
-from tabnanny import check
-from turtle import width
-from click import style
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
-import plotly
 import plotly.express as px
 
 import pandas as pd
-import pathlib
 from app import app
 import datetime
 
