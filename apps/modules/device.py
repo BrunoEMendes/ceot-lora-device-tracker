@@ -1,3 +1,4 @@
+from zmq import device
 from .client import Client
 from datetime import datetime
 import pandas as pd
@@ -73,6 +74,8 @@ class Device:
   |> aggregateWindow(every: {interval}d, fn: {transformation}, createEmpty: false)
   |> yield(name: "{transformation}")
     '''
+
+
 #################################################################################################################
 #################################################################################################################
 
@@ -140,11 +143,14 @@ class Device:
 
     def get_last_value(self, field):
         f = self.deviceprofile.get_field(field)
-        q = self._make_query(start_time='-10h', field=f, field_type='measurement')
+        q = self._make_query(start_time='-1h', field=f, field_type='measurement')
         r = self.query.query(org=self.client.org, query=q)
 
-        value =  [j.get_value() for i in r for j in i]
-        return value[-1] 
+        value =  [(j.get_value(), j.get_time()) for i in r for j in i]
+        if not value:
+            return None, None
+        else:
+            return value[-1][0], value[-1][1] 
 
     def get_mean_days(self, field, transformation, interval, start_time, end_time=''):
         f = self.deviceprofile.get_field(field)
@@ -156,7 +162,14 @@ class Device:
         df = df.sort_values(by=['time'])
         return df 
 
-     
-       
+    # def get_current_avg(self, device_name):
+    #     # hardcoding for now
+    #     max_devices =  25 if device_name == 'LHT65' else 6
+    #     device_list = ['L'+ str(d) if device_name == 'LHT65' else 'SM' + str(d) for d in range(0, max_devices + 1)]
+    #     for d in device_list:
+    #         print(d)
+    #     for f in self.deviceprofile.get_fieldnames():
+    #         v,_ = self.get_last_value(f)
+    #         print(v)
    
 

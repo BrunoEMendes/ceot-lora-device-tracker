@@ -53,7 +53,7 @@ def mapbox(field):
     tmp = []
     for index, row in lht65_location.iterrows():
         device = Device(row['Device'], dp, client, 'Arvores')
-        df = device.get_last_value(field)
+        df,time = device.get_last_value(field)
         tmp.append(df)
         
     clone = lht65_location.__deepcopy__()
@@ -75,11 +75,20 @@ def mapbox(field):
     #                     opacity=0.75,
     #                     )
     ## Option 2 -> Density plot 
-    fig = px.density_mapbox(clone, lat='Lat', lon='Lon', z=tmp, radius=75,
+    # fig = px.density_mapbox(clone, lat='Lat', lon='Lon', z=tmp, radius=75,
+    #                     center=dict(lat=37.192723, lon=-8.182952), zoom=18,
+    #                     mapbox_style="stamen-terrain", 
+    #                     color_continuous_scale = field_color[field],
+    #                     labels = {'z': field_label},
+    #                     color_continuous_midpoint = (max(tmp)-min(tmp))/2.,
+    #                     range_color=[min(tmp), max(tmp)],
+    #                     opacity=0.75,
+    #                     )
+    fig = px.scatter_mapbox(clone, lat='Lat', lon='Lon', color=tmp, size=tmp,
                         center=dict(lat=37.192723, lon=-8.182952), zoom=18,
                         mapbox_style="stamen-terrain", 
                         color_continuous_scale = field_color[field],
-                        labels = {'z': field_label},
+                        labels = {'color': field_label, 'size':''},
                         color_continuous_midpoint = (max(tmp)-min(tmp))/2.,
                         range_color=[min(tmp), max(tmp)],
                         opacity=0.75,
