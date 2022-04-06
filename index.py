@@ -3,13 +3,13 @@ from dash import html
 from dash.dependencies import Input, Output
 from app import app
 from app import server
-from apps import LHT65, LSE01, Map, Home, Home2
+from apps import LHT65, LSE01, Map, Home
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div([
         dcc.Link('Home|', href='/'),
-        # dcc.Link('Map|', href='/apps/Map'),
+        dcc.Link('Map|', href='/apps/Map'),
         dcc.Link('Sensores de Copa |', href='/apps/LHT65'),
         dcc.Link('Sensores de Solo', href='/apps/LSE01'),
     ], className="inline-block"),
@@ -27,15 +27,15 @@ app.layout = html.Div([
               [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/':
-        return Home2.layout
-    # if pathname == '/apps/Map':
-        # return Map.layout
+        return Home.layout
+    if pathname == '/apps/Map':
+        return Map.layout
     if pathname == '/apps/LHT65':
         return LHT65.layout
     if pathname == '/apps/LSE01':
         return LSE01.layout
     else:
-        return Home2.layout
+        return Home.layout
 
 
 if __name__ == '__main__':

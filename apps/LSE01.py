@@ -25,7 +25,7 @@ layout = html.Div([
             html.Div([
                 dcc.Dropdown(
                     list(config.LSE01_FIELDS.keys()),
-                    list(config.LSE01_FIELDS.keys())[0],
+                    list(config.LSE01_FIELDS.keys())[2],
                     id='xaxis-column-lse01'
                 ),
             ], style={'width': '48%', 'display': 'inline-block'}),

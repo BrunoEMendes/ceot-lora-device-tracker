@@ -23,7 +23,7 @@ layout = html.Div([
             html.Div([
                 dcc.Dropdown(
                     list(config.LHT65_FIELDS.keys()),
-                    list(config.LHT65_FIELDS.keys())[0],
+                    list(config.LHT65_FIELDS.keys())[2],
                     id='xaxis-column'
                 ),
             ], style={'width': '48%', 'display': 'inline-block'}),
