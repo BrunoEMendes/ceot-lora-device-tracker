@@ -96,7 +96,6 @@ def mapbox(field,field_soil):
 
     clone[field] = tmp
     clone_soil[field_soil] = tmp_soil
-    
     field_label = str(field)
     field_color = {'battery (V)':'RdYlGn', 'temperature (ºC)':'Portland', 
                    'illumination (lux)':'blackbody', 'humidity (%)':'YlGnBu'}
@@ -135,8 +134,8 @@ def mapbox(field,field_soil):
                         mapbox_style="stamen-terrain", 
                         color_continuous_scale = field_color[field],
                         labels = {'color': field_label},
-                        color_continuous_midpoint = (max(tmp_good)-min(tmp_good))/2.,
-                        range_color=[min(tmp_good), max(tmp_good)],
+                        color_continuous_midpoint = (max(x for x in tmp_good if x is not None)-min(x for x in tmp_good if x is not None))/2.,
+                        range_color=[min(x for x in tmp_good if x is not None), max(x for x in tmp_good if x is not None)],
                         opacity=0.75,
                         )
     # Option 3 -> Hexagonal mesh plot
@@ -147,7 +146,7 @@ def mapbox(field,field_soil):
                                   color_continuous_scale = field_color2[field_soil],
                                   labels = {'color': field_label2},
                                   mapbox_style="stamen-terrain", 
-                                  range_color=[min(tmp_soil), max(tmp_soil)],
+                                  range_color=[min(x for x in tmp_soil if x is not None), max(x for x in tmp_soil if x is not None)],
                                   show_original_data=True,
                                   opacity=0.5, min_count=1
                         )
