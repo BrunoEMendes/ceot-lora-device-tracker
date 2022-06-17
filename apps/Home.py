@@ -19,11 +19,12 @@ import pandas as pd
 
 
 layout = html.Div([
-        html.Div(children=[
-                    html.Img(src=app.get_asset_url('ceot-logo2.png'),
-                             style={'width':'445', 'height':'62'}),
-                    html.H2(children='Experimental Tree Orange Sensor Network (Paderne)')
-                    ]),
+        # html.Div(children=[
+        #             html.Img(src=app.get_asset_url('ceot-logo2.png'),
+        #                      style={'margin-left':'15px','width':'445', 'height':'62'}),
+        #             html.H2(children='Experimental Tree Orange Sensor Network (Paderne)',
+        #                     style={'margin-left':'15px'})
+        #             ],style={'text-align':'center'}),
         dcc.Interval(
             id='update-ws',
             interval=30*10000, # in milliseconds
@@ -34,9 +35,9 @@ layout = html.Div([
             interval=1000, #1sec
         ),
         
-html.Div(className='top row',
+html.Div(className='center',
                          children=[
-                             html.Div(className='6 columns div sensors',
+                             html.Div(className='main',
                                       children=[
                                           html.H2(children='Valores médios agora'),
                                           html.P(id='texto_temp',children=[]),
@@ -48,16 +49,13 @@ html.Div(className='top row',
                                        ],
                                       style={
                                       'margin-left':'10px',
-                                      'width':'30%',
+                                      'width':'40%',
                                       'vertical-align':'text-top',
                                       'text-align':'left',
                                       'font-family': 'sans-serif',
                                       'display':'inline-block',
-                                      'border-width':'0px',
-                                      'border-style':'solid',
-                                      'border-color':'black'
                                       }),
-                             html.Div(className='6 columns div meteo',
+                             html.Div(className='main',
                                       children=[
                                           html.H2(children='Condições meteorológicas agora'),
                                           html.P(id='texto_meteo_time',children=[]),
@@ -71,17 +69,35 @@ html.Div(className='top row',
                                           html.P(id='texto_meteo_wind_10min',children=[]),
                                           ],style={
                                           'margin-left':'30px',
-                                          'width':'60%',
+                                          'width':'40%',
                                           'vertical-align':'text-top',
                                           'font-family': 'sans-serif',
                                           'text-align':'left',
                                           'display':'inline-block',
-                                          'border-width':'0px',
-                                          'border-style':'solid',
-                                          'border-color':'black'
                                           }),
-                                html.Br()
+                                html.Br(),
                              ]),
+        html.Br(),
+        html.Br(),                                      
+        html.Div(className='navbar navbar-default',
+                 children=[
+                     html.P(children='Visualização de dados de uma rede de sensores LoRaWAN distribuidos num pomar de laranjeiras. \
+                            São 25 sensores de luminosidade/humidade/temperatura na copa de 25 árvores, \
+                             6 sensores de humidade de solo, e uma estação meteorológica. A cadencia dos sensores é 30 min\
+                            e da estação meteorológica é 15 min.\
+                            Este é um projeto desenvolvido pelo CEOT- Ualg (www.ceot.ualg.pt) que tem como objectivos a\
+                            implementação e estudo operacional deste tipo de redes de sensores para agricultura de precisão \
+                            e, neste caso, o estudo das condições de maturação de citrinos. Para mais informação contactar:\
+                            ceot@ualg.pt .\
+                            Este projecto tem da apoio da Altice Labs')], 
+                     style={
+                     'margin-left':'10px',
+                     'width':'90%',
+                     'vertical-align':'text-top',
+                     'text-align':'left',
+                     'font-family': 'sans-serif',
+                     'display':'inline-block',
+                     })        
         ])
 
 # @app.callback(
@@ -94,32 +110,7 @@ html.Div(className='top row',
 
 
 
-@app.callback(
-    [Output(component_id = 'texto_soil_water', component_property='children'),
-     Output(component_id = 'texto_soil_temp', component_property='children'), 
-     Output(component_id = 'texto_soil_cond', component_property='children'), 
-    [Input('update-ws', 'n_intervals')]]
-)
 
-def update_mean_data_lse01(n):
-    client = Client(secret.server, secret.port, secret.token, secret.org).client()
-
-    dp = DeviceProfile('LS01', config.LSE01_FIELDS)
-    df = pd.DataFrame(columns=list(config.LSE01_FIELDS.keys()))
-    for d in range(0, config.MAX_LSE01_DEVICES+1):
-        d = Device(f'SM{d}', dp, client, 'Solo')
-        tmp = []
-        for k, v in config.LSE01_FIELDS.items():
-            r,_ = d.get_last_value(k)
-            if r != None:
-                tmp.append(r)
-        if len(tmp) > 0:
-            df.loc[len(df)] = tmp
-
-    texto_soil_water = f'Humidade media do solo a 15 cm prof: {df["soil_hum"].mean():.2f} %'
-    texto_soil_temp = f'Temperatura media do solo a 15 cm prof.: {df["soil_tmp"].mean():.2f} ºC'
-    texto_soil_cond = f'Condutividade media do solo a 15 cm prof.: {df["soil_cond"].mean():.2f}'
-    return texto_soil_water, texto_soil_temp, texto_soil_cond
 
 
 
@@ -145,11 +136,39 @@ def update_mean_data_lht65(n):
         # print(tmp)
         if len(tmp) > 0:
             df.loc[len(df)] = tmp
-    texto_temp = f'Temperatura media: {df["tmp"].mean():.2f} ºC'
-    texto_hum = f'Humidade media: {df["hum"].mean():.2f}% RH '
-    texto_lum = f'Luminosidade media: {df["ilx"].mean()} lux'
+       
+    texto_temp = f'Temperatura media: {df["temperature (ºC)"].mean():.2f} ºC'
+    texto_hum = f'Humidade media: {df["humidity (%)"].mean():.2f}% RH '
+    texto_lum = f'Luminosidade media: {df["illumination (lux)"].mean()} lux'
+    return  texto_temp, texto_hum, texto_lum
 
-    return texto_temp, texto_hum, texto_lum
+
+@app.callback(
+    [Output(component_id = 'texto_soil_water', component_property='children'),
+     Output(component_id = 'texto_soil_temp', component_property='children'), 
+     Output(component_id = 'texto_soil_cond', component_property='children'), 
+    [Input('update-ws', 'n_intervals')]]
+)
+
+def update_mean_data_lse01(n):
+    client = Client(secret.server, secret.port, secret.token, secret.org).client()
+
+    dp = DeviceProfile('LS01', config.LSE01_FIELDS)
+    df = pd.DataFrame(columns=list(config.LSE01_FIELDS.keys()))
+    for d in range(0, config.MAX_LSE01_DEVICES+1):
+        d = Device(f'SM{d}', dp, client, 'Solo')
+        tmp = []
+        for k, v in config.LSE01_FIELDS.items():
+            r,_ = d.get_last_value(k)
+            if r != None:
+                tmp.append(r)
+        if len(tmp) > 0:
+            df.loc[len(df)] = tmp
+
+    texto_soil_water = f'Humidade media do solo (20 cm prof.): {df["soil water content (%)"].mean():.2f} %'
+    texto_soil_temp = f'Temperatura media do solo (20 cm prof.): {df["soil temperature (ºC)"].mean():.2f} ºC'
+    texto_soil_cond = f'Condutividade media do solo (20 cm prof.): {df["soil conductivity (uS/cm)"].mean():.2f}'
+    return texto_soil_water, texto_soil_temp, texto_soil_cond
 
 
 @app.callback(

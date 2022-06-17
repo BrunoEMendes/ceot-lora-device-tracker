@@ -15,7 +15,7 @@ import secret
 import plotly.graph_objects as go
 
 
-START = int(datetime(2022,3,12,7,30,0, tzinfo=None).timestamp())
+START = int(datetime(2022,3,14,0,0,0, tzinfo=None).timestamp())
 
 layout = html.Div([
     html.Div([
@@ -26,7 +26,7 @@ layout = html.Div([
                     list(config.LHT65_FIELDS.keys())[2],
                     id='xaxis-column'
                 ),
-            ], style={'width': '48%', 'display': 'inline-block'}),
+            ], style={'width': '25%', 'display': 'inline-block'}),
 
         ]),
     dcc.Graph(id='indicator-graphic',
@@ -121,7 +121,7 @@ def update_graph(xaxis_column_name, checklist, graph):
 
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'Tree Sensors {xaxis_column_name} measurement', 
+    fig.update_layout(title_text=f'Tree Sensors: {xaxis_column_name} measurement', 
                         title_x=0.5,                    
                         xaxis_title='Date',
                         yaxis_title=f'{xaxis_column_name}',)
@@ -172,7 +172,7 @@ def update_graph_last7days(field, checklist, graph):
     new_data = []
 
     fig = go.Figure()
-    fig.update_layout(title_text=f'Tree Sensors  {field} field last 7 days', 
+    fig.update_layout(title_text=f'Tree Sensors:  {field} field last 7 days', 
                     title_x=0.5,                    
                     xaxis_title='Date',
                     yaxis_title=f'{field}')
@@ -216,7 +216,7 @@ def update_signal_graph(xaxis_column_name, checklist, graph):
 
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'Tree Sensors {xaxis_column_name} field', 
+    fig.update_layout(title_text=f'Tree Sensors: {xaxis_column_name} field', 
                         title_x=0.5,                    
                         xaxis_title='Date',
                         yaxis_title=f'{xaxis_column_name}')

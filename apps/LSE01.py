@@ -16,7 +16,7 @@ import config as config
 import secret
 
 
-START = int(datetime(2022,3,12,7,30,0, tzinfo=None).timestamp())
+START = int(datetime(2022,3,14,0,0,0, tzinfo=None).timestamp())
 
 layout = html.Div([
     html.Div([
@@ -25,10 +25,10 @@ layout = html.Div([
             html.Div([
                 dcc.Dropdown(
                     list(config.LSE01_FIELDS.keys()),
-                    list(config.LSE01_FIELDS.keys())[2],
+                    list(config.LSE01_FIELDS.keys())[1],
                     id='xaxis-column-lse01'
                 ),
-            ], style={'width': '48%', 'display': 'inline-block'}),
+            ], style={'width': '25%', 'display': 'inline-block'}),
 
         ]),
     dcc.Checklist(
@@ -88,7 +88,7 @@ def update_graph(xaxis_column_name, checklist, graph):
 
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'Soil sensor {xaxis_column_name} measurement', 
+    fig.update_layout(title_text=f'Soil sensors: {xaxis_column_name} measurement', 
                         title_x=0.5,                    
                         xaxis_title='Date',
                         yaxis_title=f'{xaxis_column_name}')
@@ -138,7 +138,7 @@ def update_signal_graph(xaxis_column_name, checklist, graph):
 
     # new figure
     fig = go.Figure() 
-    fig.update_layout(title_text=f'Soil sensor {xaxis_column_name} field', 
+    fig.update_layout(title_text=f'Soil sensors: {xaxis_column_name} field', 
                         title_x=0.5,                    
                         xaxis_title='Date',
                         yaxis_title=f'{xaxis_column_name}')
